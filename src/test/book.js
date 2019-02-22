@@ -50,21 +50,20 @@ Que la clé message de la réponse simulé soit :  ‘book successfully deleted�
 
  describe('Test intégration (Empty database)', () => {
   let emptyBooks = {
-      books : [] //Bam instanciation d'un tableau vide 
+      books : []
   }
   beforeEach(done => {
       resetDatabase(
-          path.join(__dirname, '../data/books.json'),emptyBooks); //bam ça reset avec le tableau tkt
+          path.join(__dirname, '../data/books.json'),emptyBooks);
           done();
   })
-  
   it('Beng clear the database ', done => {
       chai
           .request(server)
           .get('/book')
           .end((err, res) => {
               if (err) console.log(err);
-              expect(res).to.have.status(200); //Boum c'est tout clean on voulait les réponses 200, books.length à 0 et un tableau et on les as mamene 
+              expect(res).to.have.status(200);
               console.log(res.body)
               expect(res.body).to.be.a('object');
               expect(res.body.books).to.be.a('array');
@@ -95,40 +94,21 @@ Que la clé message de la réponse simulé soit :  ‘book successfully deleted�
 });
 
 describe('Test intégration (Mocked Database)', () => {
-  beforeEach(done => {
-    resetDatabase(
-        path.join(__dirname, '../data/books.json'),book);
-        done();
-  })
-  let book = {
+let book = {
       books: [{
           id: '0db0b43e-dddb-47ad-9b4a-e5fe9ec7c2a9', 
-          title: 'Coco raconte Channel 2',
-          years: 1990,
-          pages: 400
+          title: 'Oui-oui contre Islem',
+          years: 1940,
+          pages: 667
       } ]
 }
 
+beforeEach(done => {
+  resetDatabase(
+      path.join(__dirname, '../data/books.json'),book);
+      done();
+})
 
-
-it('Beng get something 😮'), done => {
-  chai
-      .request(server)
-      .get('/book/0db0b43e-dddb-47ad-9b4a-e5fe9ec7c2a9')
-      .end((err, res) => {
-          if(err) console.log(err);
-          expect(res).to.have.status(200);
-          expect(res.body).to.be.a('object');
-          expect(res.body.message).to.equal('book fetched');
-          expect(res.body.book).to.be.a('object');
-          expect(res.body.book.years).to.be.a('number');
-          expect(res.body.book.years).to.equal(1940);
-          expect(res.body.book.pages).to.be.a('number');
-          expect(res.body.book.pages).to.equal(667);
-          expect(res.body.book.title).to.be.a('string');
-          expect(res.body.book.title).to.equal('Oui-oui contre Islem');
-      })
-}
 it('Beng put something U_u', done => {
   chai
       .request(server)
@@ -146,6 +126,26 @@ it('Beng put something U_u', done => {
       
 })
 
+it('Beng get something 😮', done => {
+  chai
+      .request(server)
+      .get('/book/0db0b43e-dddb-47ad-9b4a-e5fe9ec7c2a9')
+      .end((err, res) => {
+          if(err) console.log(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a('object');
+          expect(res.body.message).to.equal('book fetched');
+          expect(res.body.book).to.be.a('object');
+          expect(res.body.book.years).to.be.a('number');
+          expect(res.body.book.years).to.equal(1940);
+          expect(res.body.book.pages).to.be.a('number');
+          expect(res.body.book.pages).to.equal(667);
+          expect(res.body.book.title).to.be.a('string');
+          expect(res.body.book.title).to.equal('Oui-oui contre Islem');
+          done();
+      })
+})
+
 it('Beng delete something U_u', done => {
   chai
       .request(server)
@@ -159,6 +159,7 @@ it('Beng delete something U_u', done => {
       })
       
 })
+
 
 })
 
