@@ -46,8 +46,124 @@ Que la réponse ait un status 200
 Que la clé message de la réponse simulé soit :  ‘book successfully deleted’
   */
 
- 
-    
+ //Test d'intégration : Tests qui se lancent en même temps que le code et qui testent l'intégralité du code : On appelle un environnement externe
+
+ describe('Test intégration (Empty database)', () => {
+  let emptyBooks = {
+      books : [] //Bam instanciation d'un tableau vide 
+  }
+  beforeEach(done => {
+      resetDatabase(
+          path.join(__dirname, '../data/books.json'),emptyBooks); //bam ça reset avec le tableau tkt
+          done();
+  })
+  
+  it('Beng clear the database ', done => {
+      chai
+          .request(server)
+          .get('/book')
+          .end((err, res) => {
+              if (err) console.log(err);
+              expect(res).to.have.status(200); //Boum c'est tout clean on voulait les réponses 200, books.length à 0 et un tableau et on les as mamene 
+              console.log(res.body)
+              expect(res.body).to.be.a('object');
+              expect(res.body.books).to.be.a('array');
+              expect(res.body.books.length).to.equal(0);
+              done();
+          });
+  })
+
+  it('Beng add book', done => {
+      chai
+          .request(server)
+          .post('/book')
+          .send({
+              "id" :"55b7d315-1a5f-4b13-a665-c382a6c71756",
+              "title" : "Oui-oui contre Islem",
+              "years" : "1940",
+              "pages": "667"
+          })
+          .end((err, res) => {
+              if(err) console.log(err);
+              expect(res).to.have.status(200);
+              expect(res.body).to.be.a('object');
+              expect(res.body.message).to.equal('book successfully added');
+              done();
+          })
+  })
+
+});
+
+describe('Test intégration (Mocked Database)', () => {
+  beforeEach(done => {
+    resetDatabase(
+        path.join(__dirname, '../data/books.json'),book);
+        done();
+  })
+  let book = {
+      books: [{
+          id: '0db0b43e-dddb-47ad-9b4a-e5fe9ec7c2a9', 
+          title: 'Coco raconte Channel 2',
+          years: 1990,
+          pages: 400
+      } ]
+}
+
+
+
+it('Beng get something 😮'), done => {
+  chai
+      .request(server)
+      .get('/book/0db0b43e-dddb-47ad-9b4a-e5fe9ec7c2a9')
+      .end((err, res) => {
+          if(err) console.log(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a('object');
+          expect(res.body.message).to.equal('book fetched');
+          expect(res.body.book).to.be.a('object');
+          expect(res.body.book.years).to.be.a('number');
+          expect(res.body.book.years).to.equal(1940);
+          expect(res.body.book.pages).to.be.a('number');
+          expect(res.body.book.pages).to.equal(667);
+          expect(res.body.book.title).to.be.a('string');
+          expect(res.body.book.title).to.equal('Oui-oui contre Islem');
+      })
+}
+it('Beng put something U_u', done => {
+  chai
+      .request(server)
+      .put('/book/0db0b43e-dddb-47ad-9b4a-e5fe9ec7c2a9')
+      .send({
+          "title" : "Ali et les 40 Islem "
+      })
+      .end((err, res) => {
+          if(err) console.log(err);
+          expect(res).to.have.status(200);
+          expect(res.body.message).to.be.a('string');
+          expect(res.body.message).to.equal('book successfully updated');
+          done();
+      })
+      
+})
+
+it('Beng delete something U_u', done => {
+  chai
+      .request(server)
+      .delete('/book/0db0b43e-dddb-47ad-9b4a-e5fe9ec7c2a9')
+      .end((err, res) => {
+          if(err) console.log(err);
+          expect(res).to.have.status(200);
+          expect(res.body).to.be.a('object');
+          expect(res.body.message).to.equal('book successfully deleted');
+          done();
+      })
+      
+})
+
+})
+
+
+
 describe('Test unity(Totu va bene)', () => {
 
   beforeEach(()=>{ //Avant chaque test on clean tout ce qui a été intercepté par nock
@@ -109,7 +225,8 @@ it('Devrait envoyer un status 200 et un message si la mise à jour fonctionne',d
   nock("http://localhost:8080")
   .put('/book/49657845666') //On intercepte le livre avec l'ID correspondante 
   .reply(200,message)
-      chai
+     
+  chai
       .request('http://localhost:8080')
       .put('/book/49657845666') //On récupère les données du livre pour les modifier
       .send({
@@ -132,7 +249,8 @@ it('Devrait si le delete a fonctionné envoyer un status 200 et un message',done
   nock("http://localhost:8080")
   .delete('/book/49657845666') //On intercepte la fonction delete et on renvoie le status et le message
   .reply(200,message)
-      chai
+     
+  chai
       .request('http://localhost:8080')
       .delete('/book/49657845666') 
       .end((err, res) => { // On vérifie que cela a bien fonctionné avec le status envoyé, et la bonne ficelle 
@@ -178,7 +296,7 @@ it('Devrait pour le get envoyer un status 200 et un message',done=>{
 
 
 
-
+//Test unitaire : On exécute nous mêmes les fonctions une par unes pour les tester unes par unes : On contrôle nous même l'environnement
 describe('Test unity (oups c kassé)', () => {
 
   beforeEach(()=>{
@@ -229,6 +347,7 @@ describe('Test unity (oups c kassé)', () => {
               done();
           });
   })
+
   it('devrait pour la modif ratée envoyer un 400 et un message',done=>{
       let message = {
           message: 'Erreur en essayant de mettre à jour le livre' //Le message 
@@ -251,6 +370,7 @@ describe('Test unity (oups c kassé)', () => {
               done();
           });
   })
+
   it('devrait pour le delete raté envoyer un 400 et le message',done=>{
       let message = {
           message: 'Erreur en supprimant le livre'
@@ -291,11 +411,7 @@ describe('Test unity (oups c kassé)', () => {
           });
   })
 })
-   /* Chai
-    .request(server) 
-    .get("/book")
-    Apibookinterceptor = nock(http://localhost:8080) 
-    Expect(rest).to.havestatus(200) */
+
 
 
 
